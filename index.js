@@ -2,6 +2,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Messages from "./dbMessages.js";
+import Pusher from "pusher";
 //app config
 const app = express();
 const port = process.env.PORT || 9000;
@@ -12,9 +13,17 @@ app.use(express.json());
 const connection_url =
   "mongodb+srv://mobolaji2309:%40omolara1@cluster0.7iplld4.mongodb.net/whatsappDB?retryWrites=true&w=majority";
 mongoose.connect(connection_url);
+const pusher = new Pusher({
+  appId: "1680772",
+  key: "63511d52b71ee1d0b466",
+  secret: "64469a13dd7bcaa4792b",
+  cluster: "eu",
+  useTLS: true,
+});
+
 app.get("/", (req, res) => res.status(200).send("hello world"));
 
-app.post("/api/v1/messages/syncs", (req, res) => {
+app.get("/messages/syncs", (req, res) => {
   Messages.find()
     .then((data) => {
       res.status(200).send(data);
