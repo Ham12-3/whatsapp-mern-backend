@@ -20,6 +20,25 @@ const pusher = new Pusher({
   cluster: "eu",
   useTLS: true,
 });
+const db = mongoose.connection;
+
+db.once("open", () => {
+  console.log("DB connected");
+  const msgCollection = db.collection("messagecontents");
+  const changeStream = msgCollection.watch();
+  changeStream.on("change", (change) => {
+    console.log(change);
+    if (change.operationType === "insert") {
+      const messageDetails = change.fullDocument;
+      pusher.trigger("messages", "inserted", {
+        name: messageDetails.user,
+        message: messageDetails.message,
+      });
+    } else {
+      console.log("Error trigerring Pusher");
+    }
+  });
+});
 
 app.get("/", (req, res) => res.status(200).send("hello world"));
 
